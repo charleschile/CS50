@@ -1,0 +1,38 @@
+#include <cs50.h>
+#include <stdio.h>
+
+int main(void)
+{
+    int height, row, column, space;
+    // Prompt user for height
+    do
+    {
+        height = get_int("Enter Your Height: ");
+    }
+    while (height < 1 || height > 8);
+
+    // For each row
+    for (row = 0; row < height; row++)
+    {
+        // For each space
+        for (space = 0; space < height - row - 1; space++)
+        {
+            printf(" ");
+        }
+        // For each column
+        for (column = 0; column <= row; column++)
+        {
+            printf("#");
+        }
+        // Constant two spaces
+        printf("  ");
+        // The right part
+        for (column = 0; column <= row; column++)
+        {
+            printf("#");
+        }
+        // Move to next row
+        printf("\n");
+    }
+
+}
