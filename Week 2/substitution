@@ -1,0 +1,124 @@
+#include <cs50.h>
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+string encrypt(string text, string substitute);
+bool check_duplicate(string text);
+bool check_invalid(string text);
+
+int main(int argc, string argv[])
+{
+    // check if there is no command-line argument
+    if (argc == 1)
+    {
+        // if no command-line argument, exit
+        printf("Usage: ./substitution key\n");
+        return 1;
+    }
+
+    string key = argv[1];
+    int length = strlen(key);
+
+    // check whether the key is valid
+    if (argc == 2)
+    {
+        if (length != 26)
+        {
+            // if length does not equal to 26, exit
+            printf("Key must contain 26 characters.\n");
+            return 1;
+        }
+        else if (check_duplicate(key))
+        {
+            // if there are duplicate characters, exit
+            printf("Key must not contain duplicate characters.\n");
+            return 1;
+        }
+        else if (check_invalid(key))
+        {
+            // if there are invalid characters, exit
+            printf("Invalid character in key.\n");
+            return 1;
+        }
+        else
+        {
+            // plain text should be provided and encrypted if the key is valid
+            string plain_text = get_string("plaintext: ");
+            string cipher_text = encrypt(plain_text, key);
+            printf("ciphertext: %s\n", cipher_text);
+            return 0;
+        }
+    }
+    else
+    {
+        printf("Usage: ./substitution key\n");
+        return 1;
+    }
+}
+
+// implementation of substitution cipher
+string encrypt(string text, string substitute)
+{
+    int text_len = strlen(text);
+    int substitute_len = strlen(substitute);
+    // convert all the letters of key to uppercase
+    for (int i = 0; i < substitute_len; i++)
+    {
+        substitute[i] = toupper(substitute[i]);
+    }
+    // substitution
+    for (int j = 0; j < text_len; j++)
+    {
+        if (text[j] >= 'A' && text[j] <= 'Z')
+        {
+            text[j] = substitute[(int)text[j] - 65];
+        }
+        else if (text[j] >= 'a' && text[j] <= 'z')
+        {
+            text[j] = substitute[(int)text[j] - 97] + 32;
+        }
+        else
+        {
+            text[j] = text[j];
+        }
+    }
+    return text;
+}
+
+// check if there are duplicate characters
+bool check_duplicate(string text)
+{
+    int text_len = strlen(text);
+    int check = 0;
+    for (int i = 0; i < text_len; i++)
+    {
+        for (int j = i + 1; j < text_len; j++)
+        {
+            if (text[i] == text[j])
+            {
+                check = check + 1;
+            }
+        }
+    }
+    return check != 0;
+}
+
+// check if there are invalid characters
+bool check_invalid(string text)
+{
+    int text_len = strlen(text);
+    int check2 = 0;
+    for (int i = 0; i < text_len; i++)
+    {
+        if (isalpha(text[i]))
+        {
+            check2 = check2 + 0;
+        }
+        else
+        {
+            check2 = check2 + 1;
+        }
+    }
+    return check2 != 0;
+}
