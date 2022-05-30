@@ -1,0 +1,99 @@
+#include <cs50.h>
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+int count_letters(string text);
+int count_words(string text);
+int count_sentences(string text);
+
+int main(void)
+{
+    // prompt user for imput
+    string input = get_string("Text: ");
+    int letters = count_letters(input);
+    int words = count_words(input);
+    int sentences = count_sentences(input);
+    // printf("%i letters\n", letters);
+    // printf("%i words\n", words);
+    // printf("%i sentences\n", sentences);
+    // index = 0.0588 * L - 0.296 * S - 15.8
+    double L = (double)letters / (double)words * 100;
+    double S = (double)sentences / (double)words * 100;
+    double index1 = 0.0588 * L - 0.296 * S - 15.8;
+    int index = (int)(index1 + 0.5);
+    // printf("L is %f\n", L);
+    // printf("S is %f\n", S);
+    // printf("index1 is %f\n", index1);
+    // printf("index is %i\n",index);
+
+    if (index >= 16)
+    {
+        printf("Grade 16+\n");
+    }
+    else if (index < 1)
+    {
+        printf("Before Grade 1\n");
+    }
+    else
+    {
+        printf("Grade %i\n", index);
+    }
+}
+
+// count the number of letters in the text
+int count_letters(string text)
+{
+    int count_of_letters = 0;
+    int length = strlen(text);
+    for (int i = 0; i < length; i++)
+    {
+        if (isalpha(text[i]))
+        {
+            count_of_letters = count_of_letters + 1;
+        }
+    }
+    return count_of_letters;
+}
+
+// count the number of words in the text
+int count_words(string text)
+{
+    int count_of_words = 1;
+    int length = strlen(text);
+    for (int i = 0; i < length; i++)
+    {
+        if (text[i] == ' ')
+        {
+            count_of_words = count_of_words + 1;
+        }
+    }
+    return count_of_words;
+}
+
+// count the number of sentences in the text
+int count_sentences(string text)
+{
+    int count_of_sentences = 0;
+    int length = strlen(text);
+    for (int i = 0; i < length; i++)
+    {
+        if (text[i] == '.')
+        {
+            count_of_sentences = count_of_sentences + 1;
+        }
+        else if (text[i] == '!')
+        {
+            count_of_sentences = count_of_sentences + 1;
+        }
+        else if (text[i] == '?')
+        {
+            count_of_sentences = count_of_sentences + 1;
+        }
+        else
+        {
+            count_of_sentences = count_of_sentences + 0;
+        }
+    }
+    return count_of_sentences;
+}
