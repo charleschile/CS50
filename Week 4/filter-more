@@ -1,0 +1,167 @@
+#include "helpers.h"
+#include <math.h>
+
+// Convert image to grayscale
+void grayscale(int height, int width, RGBTRIPLE image[height][width])
+{
+    for (int i = 0; i < height; i++)
+    {
+        for (int j = 0; j < width; j++)
+        {
+            int average = round((image[i][j].rgbtRed + image[i][j].rgbtGreen + image[i][j].rgbtBlue) / 3.0);
+            image[i][j].rgbtRed = average;
+            image[i][j].rgbtBlue = average;
+            image[i][j].rgbtGreen = average;
+        }
+    }
+    return;
+}
+
+// Reflect image horizontally
+void reflect(int height, int width, RGBTRIPLE image[height][width])
+{
+    for (int i = 0; i < height; i++)
+    {
+        if (width % 2 == 1)
+        {
+            for (int j = 0; j < ((width + 1) / 2) - 1; j ++)
+            {
+                RGBTRIPLE replace[i][j];
+                replace[i][j] = image[i][j];
+                image[i][j] = image[i][width - 1 - j];
+                image[i][width - 1 - j] = replace[i][j];
+            }
+        }
+        else
+        {
+            for (int j = 0; j < width / 2; j ++)
+            {
+                RGBTRIPLE replace[i][j];
+                replace[i][j] = image[i][j];
+                image[i][j] = image[i][width - 1 - j];
+                image[i][width - 1 - j] = replace[i][j];
+            }
+        }
+    }
+    return;
+}
+
+// Blur image
+void blur(int height, int width, RGBTRIPLE image[height][width])
+{
+    RGBTRIPLE replace[height][width];
+    for (int i = 0; i < height; i++)
+    {
+        for (int j = 0; j < width; j++)
+        {
+            float blueSum = 0;
+            float greenSum = 0;
+            float redSum = 0;
+            float counter = 0;
+            for (int x = i - 1; x < i + 2; x++)
+            {
+                for (int y = j - 1; y < j + 2; y++)
+                {
+                    if (x < 0 || x > height - 1)
+                    {
+                        continue;
+                    }
+                    if (y < 0 || y > width - 1)
+                    {
+                        continue;
+                    }
+                    blueSum += image[x][y].rgbtBlue;
+                    greenSum += image[x][y].rgbtGreen;
+                    redSum += image[x][y].rgbtRed;
+                    counter++;
+                }
+            }
+            replace[i][j].rgbtBlue = round(blueSum / counter);
+            replace[i][j].rgbtGreen = round(greenSum / counter);
+            replace[i][j].rgbtRed = round(redSum / counter);
+        }
+    }
+    for (int i = 0; i < height; i++)
+    {
+        for (int j = 0; j < width; j++)
+        {
+            image[i][j].rgbtBlue = replace[i][j].rgbtBlue;
+            image[i][j].rgbtGreen = replace[i][j].rgbtGreen;
+            image[i][j].rgbtRed = replace[i][j].rgbtRed;
+        }
+    }
+    return;
+}
+
+// Detect edges
+void edges(int height, int width, RGBTRIPLE image[height][width])
+{
+    RGBTRIPLE replace[height][width];
+    int kernelX[3][3] = {{-1, 0, 1}, {-2, 0, 2}, {-1, 0, 1}};
+    int kernelY[3][3] = {{-1, -2, -1}, {0, 0, 0}, {1, 2, 1}};
+    for (int i = 0; i < height; i++)
+    {
+        for (int j = 0; j < width; j++)
+        {
+            int gxBlue = 0;
+            int gyBlue = 0;
+            int gxGreen = 0;
+            int gyGreen = 0;
+            int gxRed = 0;
+            int gyRed = 0;
+            for (int x = i - 1; x < i + 2; x++)
+            {
+                for (int y = j - 1; y < j + 2; y++)
+                {
+                    if (x < 0 || x > height - 1)
+                    {
+                        continue;
+                    }
+                    if (y < 0 || y > width - 1)
+                    {
+                        continue;
+                    }
+                    gxBlue += image[x][y].rgbtBlue * kernelX[x - i + 1][y - j + 1];
+                    gyBlue += image[x][y].rgbtBlue * kernelY[x - i + 1][y - j + 1];
+                    gxGreen += image[x][y].rgbtGreen * kernelX[x - i + 1][y - j + 1];
+                    gyGreen += image[x][y].rgbtGreen * kernelY[x - i + 1][y - j + 1];
+                    gxRed += image[x][y].rgbtRed * kernelX[x - i + 1][y - j + 1];
+                    gyRed += image[x][y].rgbtRed * kernelY[x - i + 1][y - j + 1];
+                }
+            }
+            // calculate Sobel operator
+            int blue = round(sqrt(gxBlue * gxBlue + gyBlue * gyBlue));
+            int green = round(sqrt(gxGreen * gxGreen + gyGreen * gyGreen));
+            int red = round(sqrt(gxRed * gxRed + gyRed * gyRed));
+            // cap at 255
+            if (blue > 255)
+            {
+                blue = 255;
+            }
+            if (green > 255)
+            {
+                green = 255;
+            }
+            if (red > 255)
+            {
+                red = 255;
+            }
+            replace[i][j].rgbtBlue = blue;
+            replace[i][j].rgbtGreen = green;
+            replace[i][j].rgbtRed = red;
+        }
+    }
+    for (int i = 0; i < height; i++)
+    {
+        for (int j = 0; j < width; j++)
+        {
+            // assign new values to pixels
+            image[i][j].rgbtBlue = replace[i][j].rgbtBlue;
+            image[i][j].rgbtGreen = replace[i][j].rgbtGreen;
+            image[i][j].rgbtRed = replace[i][j].rgbtRed;
+        }
+    }
+
+
+    return;
+}
